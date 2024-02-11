@@ -1,6 +1,6 @@
 mod convert;
 
-use crate::convert::to_arabic::validate_roman_input;
+use crate::convert::to_arabic::{convert_to_arabic, validate_roman_input};
 use crate::convert::to_roman::validate_arabic_input;
 use clap::{Parser, Subcommand};
 
@@ -32,9 +32,10 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::ToArabic { roman } => {
-            println!("'roman-numerals to-arabic' was used, roman is: {roman:?}")
-        }
+        Commands::ToArabic { roman } => match convert_to_arabic(roman.to_string()) {
+            Ok(val) => println!("{val}"),
+            Err(e) => eprintln!("{e}"),
+        },
         Commands::ToRoman { arabic } => {
             println!("'roman-numerals to-roman' was used, arabic is: {arabic:?}")
         }
