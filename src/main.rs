@@ -1,7 +1,7 @@
 mod convert;
 
 use crate::convert::to_arabic::{convert_to_arabic, validate_roman_input};
-use crate::convert::to_roman::validate_arabic_input;
+use crate::convert::to_roman::{convert_to_roman, validate_arabic_input};
 use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
@@ -36,8 +36,9 @@ fn main() {
             Ok(val) => println!("{val}"),
             Err(e) => eprintln!("{e}"),
         },
-        Commands::ToRoman { arabic } => {
-            println!("'roman-numerals to-roman' was used, arabic is: {arabic:?}")
-        }
+        Commands::ToRoman { arabic } => match convert_to_roman(*arabic) {
+            Ok(val) => println!("{val}"),
+            Err(e) => eprintln!("{e}"),
+        },
     }
 }
