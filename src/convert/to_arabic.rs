@@ -13,7 +13,7 @@ pub fn validate_roman_input(s: &str) -> Result<String, String> {
     }
 }
 
-static ROMAN_VALUES: phf::Map<char, u16> = phf_map! {
+static ROMAN_VALUES: phf::Map<char, i16> = phf_map! {
     'I' => 1,
     'V' => 5,
     'X' => 10,
@@ -23,26 +23,24 @@ static ROMAN_VALUES: phf::Map<char, u16> = phf_map! {
     'M' => 1000,
 };
 
-pub fn convert_to_arabic(input: String) -> Result<u16, String> {
-    let arabic_values: Result<Vec<u16>, String> = input
+pub fn convert_to_arabic(input: String) -> Result<i16, String> {
+    let arabic_values: Result<Vec<i16>, String> = input
         .chars()
         .map(|c| match ROMAN_VALUES.get(&c).cloned() {
-            Some(x) => Ok(x as u16),
-            None => return Err(format!("Unknown roman character `{c}`")),
+            Some(x) => Ok(x),
+            None => Err(format!("Unknown roman character `{c}`")),
         })
         .collect();
 
     match arabic_values {
-        Ok(values) => Ok(values
-            .into_iter()
-            .rfold((0, 0), |acc, val| {
-                if val < acc.1 {
-                    (acc.0 - val, val)
-                } else {
-                    (acc.0 + val, val)
-                }
-            })
-            .0),
+        Ok(values) => {
+            let mut last_value: i16 = 0;
+            Ok(values.into_iter().rfold(0, |acc, val| {
+                let mult: i16 = if val < last_value { -1 } else { 1 };
+                last_value = val;
+                acc + (val * mult)
+            }))
+        }
         Err(e) => Err(e),
     }
 }
@@ -84,6 +82,7 @@ mod tests {
         assert_eq!(Ok(14), convert_to_arabic("XIV".to_string()));
         assert_eq!(Ok(1776), convert_to_arabic("MDCCLXXVI".to_string()));
         assert_eq!(Ok(1918), convert_to_arabic("MCMXVIII".to_string()));
+        assert_eq!(Ok(3999), convert_to_arabic("MMMCMXCIX".to_string()));
     }
 
     #[test]

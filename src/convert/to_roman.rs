@@ -33,17 +33,14 @@ const FACTORS: &'static [(u16, [&'static str; 10])] = &[
 
 pub fn convert_to_roman(input: u16) -> Result<String, String> {
     if ROMAN_RANGE.contains(&usize::from(input)) {
-        let roman = FACTORS
-            .into_iter()
-            .fold(("".to_string(), input), |acc, fact| {
-                let (base, numerals) = fact;
-                let num = acc.1 / base;
-                let result = acc.0 + numerals[usize::from(num)];
-                let remainder = acc.1 - (base * num);
-                (result.to_string(), remainder)
-            })
-            .0;
-        Ok(roman.to_string())
+        let mut remainder = input;
+        let roman = FACTORS.iter().fold("".to_string(), |result, fact| {
+            let (base, numerals) = fact;
+            let num = remainder / base;
+            remainder = remainder - (base * num);
+            result + numerals[usize::from(num)]
+        });
+        Ok(roman)
     } else {
         Err(format!(
             "Arabic number is not in range for a Roman numeral {}-{}",
@@ -99,7 +96,8 @@ mod tests {
         assert_eq!(Ok("DCCLXXXIX".to_string()), convert_to_roman(789));
         assert_eq!(Ok("MDCCLXXVI".to_string()), convert_to_roman(1776));
         assert_eq!(Ok("MCMXVIII".to_string()), convert_to_roman(1918));
-        assert_eq!(Ok("MCMXLIV".to_string()), convert_to_roman(1944))
+        assert_eq!(Ok("MCMXLIV".to_string()), convert_to_roman(1944));
+        assert_eq!(Ok("MMMCMXCIX".to_string()), convert_to_roman(3999));
     }
 
     #[test]
